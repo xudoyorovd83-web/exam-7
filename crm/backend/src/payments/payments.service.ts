@@ -45,14 +45,14 @@ export class PaymentsService {
   }
 
   async totalThisMonth(): Promise<number> {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const result = await this.paymentsRepository
-      .createQueryBuilder('payment')
-      .select('SUM(payment.amount)', 'total')
-      .where('payment.date LIKE :pattern', { pattern: `${year}-${month}%` })
-      .getRawOne();
-    return parseFloat(result.total) || 0;
-  }
+  const result = await this.paymentsRepository
+    .createQueryBuilder('payment')
+    .select('SUM(payment.amount)', 'total')
+    .where(
+      `DATE_TRUNC('month', payment.date) = DATE_TRUNC('month', CURRENT_DATE)`
+    )
+    .getRawOne();
+
+  return parseFloat(result.total) || 0;
+}
 }
